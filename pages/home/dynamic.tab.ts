@@ -26,6 +26,16 @@ export class DynamicTab {
         await this.staysTab.click();
     }
 
+    private async selectDate(date: string): Promise<void> {
+        const [day, month, year] = date.split('-');
+        const datepicker = this.page.locator('.datepicker:not(.hidden)');
+        await datepicker.locator('.datepicker-days th.switch').click();
+        await datepicker.locator('.datepicker-months th.switch').click();
+        await datepicker.locator('.datepicker-years .year').filter({ hasText: year }).click();
+        await datepicker.locator('.datepicker-months .month').filter({ hasText: month }).click();
+        await datepicker.locator('.datepicker-days .day').filter({ hasText: day }).click();
+    }
+
     async searchFlight(from: string, to: string, date: string, type: string, flightClass: string): Promise<void> {
         const departureFromInput = this.page.getByPlaceholder('Departure City or Airport');
         const arrivalToInput = this.page.getByPlaceholder('Arrival City or Airport');
@@ -35,15 +45,11 @@ export class DynamicTab {
         const searchButton = this.page.getByRole('button', { name: 'Search Flights' });
 
         await departureFromInput.fill(from);
-        await this.page.click('text=All airports');
+        await this.page.getByText('All airports').first().click();
         await arrivalToInput.fill(to);
-        await this.page.click('text=All airports');
+        await this.page.getByText('All airports').first().click();
 
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-days th.switch').click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-months th.switch').click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-years .year').filter({ hasText: date.split('-')[2] }).click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-months .month').filter({ hasText: date.split('-')[1] }).click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-days .day').filter({ hasText: date.split('-')[0] }).click();
+        await this.selectDate(date);
 
         await flightTypeInput.locator('.input.cursor-pointer').click();
         await flightTypeInput.locator('.input-dropdown-item').filter({ hasText: type }).click();
@@ -68,21 +74,13 @@ export class DynamicTab {
             .click();
 
         await checkinInput.click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-days th.switch').click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-months th.switch').click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-years .year').filter({ hasText: checkin.split('-')[2] }).click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-months .month').filter({ hasText: checkin.split('-')[1] }).click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-days .day').filter({ hasText: checkin.split('-')[0] }).click();
+        await this.selectDate(checkin);
 
         await this.page.waitForFunction(() =>
             document.querySelectorAll('.datepicker:not(.hidden)').length === 1
         );
         
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-days th.switch').click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-months th.switch').click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-years .year').filter({ hasText: checkout.split('-')[2] }).click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-months .month').filter({ hasText: checkout.split('-')[1] }).click();
-        await this.page.locator('.datepicker:not(.hidden) .datepicker-days .day').filter({ hasText: checkout.split('-')[0] }).click();
+        await this.selectDate(checkout);
 
         await nationalityInput.click();
         await this.page.getByPlaceholder('Search country...').fill(nationality);
